@@ -1,0 +1,25 @@
+---
+title: "cp4"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+## Os dados
+
+```{r}
+github = read.csv(here::here("data/github-users-committing-filetypes.csv"))
+glimpse(github)
+
+#lastfm %>% ggplot(aes(news)) + geom_histogram(binwidth = 10)
+#lastfm %>% ggplot(aes(ecletic)) + geom_histogram(binwidth = 100)
+```
+
+## Perguntas
+
+1 - Para cada uma delas, há uma diferença significativa na sua popularidade durante a semana e durante o fim de semana? Essa diferença é grande? (dica: aqui você precisa decidir como medir popularidade: média? mediana? outra estatística?)
+
+2 - Existe uma diferença significativa entre a popularidade das duas linguagens nos fins de semana? (a mesma dica vale)
