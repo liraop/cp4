@@ -34,7 +34,7 @@ glimpse(github)
 É interessante deixar a manipulação dos dados da maneira mais intuitiva possível. Para isso, sabemos que os dias 1 e 7, Sábado e Domingo, respectivamente, são finais de semana. Formalizando isso na tabela:
 
 ```{r}
-github <- mutate(github, eh_fds = ifelse(github$dia_da_semana == 1 | github$dia_da_semana == 7, TRUE, FALSE))
+github <- mutate(github, eh_fds = ifelse(github$dia_da_semana == 1 | github$dia_da_semana == 7, "Sim", "Não"))
 
 glimpse(github)
 ```
@@ -78,16 +78,25 @@ Para a linguagem *shell*:
 
 ```{r}
 shell <- ggplot(amostra_shell, aes(eh_fds, media_usuarios, fill = eh_fds)) + 
+  labs(x = "É final de semana?",
+       y = "Média de usuário que commitaram",
+       title = "Média de popularidade do Shell em Dias de Semana vs Finais de Semana" ) +
   geom_bar(stat="identity", position = "dodge") + 
   scale_fill_brewer(palette = "Set1")
 
 ggplotly(shell)
 ```
 
+Podemos ver que os programadores em *shell* preferem subir seu trabalho durante os dias de semana.
+A diferença é razoável mas não chega a ser gritante como o da linguagem *python*.
+
 Para a linguagem *python*:
 
 ```{r}
 python <- ggplot(amostra_python, aes(eh_fds, media_usuarios, fill = eh_fds)) + 
+  labs(x = "É final de semana?",
+       y = "Média de usuário que commitaram",
+       title = "Média de popularidade do Python em Dias de Semana vs Finais de Semana" ) +
   geom_bar(stat="identity", position = "dodge") + 
   scale_fill_brewer(palette = "Set1")
 
@@ -96,5 +105,11 @@ ggplotly(python)
 
 Vemos que existe uma diferença significativa entre a popularidade da linguagem durante a semana e durante o final de semana. É quase o dobro da média de usuários que commitam mais durante a semana.
 
-
 > 2 - Existe uma diferença significativa entre a popularidade das duas linguagens nos fins de semana? (a mesma dica vale)
+
+```{r}
+amostra_python = dados_python
+amostra_shell = dados_shell
+
+
+```
