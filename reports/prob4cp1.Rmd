@@ -10,13 +10,26 @@ library(tidyverse)
 
 ## Os dados
 
+O GitHub é uma plataforma online que se tornou padrão para desenvolvedores armazenarem projetos e repositórios online. Devido a sua facilidade de uso e importância para o ecosistema da comunidade Open Source, existe uma enorme base de usuários que utilizam a plataforma diariamente, bem como uma enorme variedade de projetos que são hospedados. Por essas características, os dados do GitHub se tornam bons indicadores de tendências e hábitos de desenvolvedores e projetos do mundo todo. 
+
+A amostra abaixo é um pequeno traço desses dados.
 ```{r}
 github = read.csv(here::here("data/github-users-committing-filetypes.csv"))
 glimpse(github)
-
-#lastfm %>% ggplot(aes(news)) + geom_histogram(binwidth = 10)
-#lastfm %>% ggplot(aes(ecletic)) + geom_histogram(binwidth = 100)
 ```
+
+
+
+```{r}
+dados_python <- github %>%
+          filter(file_extension == 'py')
+
+
+dados_shell <- github %>%
+          filter(file_extension == 'sh')
+```
+
+Como temos apenas uma amostra dos dados do GitHub, a técnica de *bootstrapping* se enciaxa como alternativa para gerar um conjunto de amostras, grande o suficiente para emular uma população, com o intuito de fazermos inferências que sejam confiáveis.
 
 ## Perguntas
 
