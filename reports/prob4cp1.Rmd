@@ -6,6 +6,8 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+library(printr)
+library(lubridate)
 ```
 
 ## Os dados
@@ -19,6 +21,7 @@ glimpse(github)
 ```
 
 
+Existem diversas extensões, que representam linguagens. Desse universo, filtraremos os dados para analisar somente as linguagem *python* e *shell*.
 
 ```{r}
 dados_python <- github %>%
@@ -27,7 +30,11 @@ dados_python <- github %>%
 
 dados_shell <- github %>%
           filter(file_extension == 'sh')
+
+dados_shell %>% rbind(dados_shell, x = ymd(paste(dados_shell$the_year,"/",dados_shell$the_month,"/",dados_shell$month_day)))
 ```
+
+
 
 Como temos apenas uma amostra dos dados do GitHub, a técnica de *bootstrapping* se enciaxa como alternativa para gerar um conjunto de amostras, grande o suficiente para emular uma população, com o intuito de fazermos inferências que sejam confiáveis.
 
