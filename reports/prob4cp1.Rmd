@@ -20,12 +20,20 @@ github = read.csv(here::here("data/github-users-committing-filetypes.csv"))
 glimpse(github)
 
 ```
-
+A .csv contém os dados de commits de 2016 até 2017, além a quantidade de usuários que commitaram arquivos daquela extensão. A extensão implica na linguagem utilizada para escrever o código.
 Sabemos, contudo, que queremos observar o comportamento desses dados durante dias de semana e finais de semana. Utilizando a biblioteca `lubridate`, conseguimos transformar as datas do *data frame* em dias da semana, de forma que, ao escolhermos as duas linguagens para análise, a manipulação dos dados seja mais prática.
 Os dias da semana são representados de 1 à 7, representando respectivamente de Domingo à Sábado.
 
 ```{r}
 github <- mutate(github, dia_da_semana = wday(ymd(paste(github$the_year,"/",github$the_month,"/",github$month_day))))
+
+glimpse(github)
+```
+
+É interessante deixar a manipulação dos dados da maneira mais intuitiva possível. Para isso, sabemos que os dias 1 e 7, Sábado e Domingo, respectivamente, são finais de semana. Formalizando isso na tabela:
+
+```{r}
+github <- mutate(github, eh_fds = ifelse(github$dia_da_semana == 1 | github$dia_da_semana == 7, TRUE, FALSE))
 
 glimpse(github)
 ```
@@ -44,7 +52,51 @@ Como temos apenas uma amostra dos dados do GitHub, a técnica de *bootstrapping*
 
 ## Perguntas
 
-1 - Para cada uma delas, há uma diferença significativa na sua popularidade durante a semana e durante o fim de semana? Essa diferença é grande? (dica: aqui você precisa decidir como medir popularidade: média? mediana? outra estatística?)
+> 1 - Para cada uma delas, há uma diferença significativa na sua popularidade durante a semana e durante o fim de semana? Essa diferença é grande? (dica: aqui você precisa decidir como medir popularidade: média? mediana? outra estatística?)
+
+Para responder essa pergunta, defino como critério de popularidade a média de usuários que commitaram durante a semana e o final de semana. Por quê a média? Porque todos os usuários tem valor igual para nossa análise. Queremos inferir uma estatística que é comum a todos, sem peso ou valor maior para um elemento específico.
+
+Assim, temos as seguintes tabelas com a média de usuários que commitaram da amostra para dias de semana e finais de semana
+
+```{r}
+amostra_python = dados_python
+amostra_shell = dados_shell
+
+amostra_python <- dados_python %>%
+          select(eh_fds, users) %>%
+          group_by(eh_fds) %>%
+          summarise(mean(users))
+
+amostra_shell <- dados_shell %>%
+          select(eh_fds, users) %>%
+          group_by(eh_fds) %>%
+          summarise(mean(users))
+
+```
 
 
-2 - Existe uma diferença significativa entre a popularidade das duas linguagens nos fins de semana? (a mesma dica vale)
+```{r}
+media_amostra = mean(amostra$)
+
+repeticoes = 5000
+
+exp_com_bootstrap <- function(x){
+  boot_x <- sample(x,
+                   size = NROW(x), 
+                   replace = TRUE) # aqui é o bootstrap
+  return(mean(boot_x))
+}
+
+# Agora o input das reamostragens é a amostra!
+experimentos = data_frame(i = 1:repeticoes) %>% 
+    rowwise() %>% 
+    mutate(media_exp = exp_com_bootstrap(amostra)) %>%  # <- Aqui!
+    ungroup() 
+
+ggplot(experimentos, aes(x = media_exp)) + 
+  geom_histogram(binwidth = 1, colour = "darkorange", fill = "white")
+summary(experimentos)
+
+```
+
+> 2 - Existe uma diferença significativa entre a popularidade das duas linguagens nos fins de semana? (a mesma dica vale)
