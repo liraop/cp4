@@ -18,8 +18,17 @@ A amostra abaixo é um pequeno traço desses dados.
 ```{r}
 github = read.csv(here::here("data/github-users-committing-filetypes.csv"))
 glimpse(github)
+
 ```
 
+Sabemos, contudo, que queremos observar o comportamento desses dados durante dias de semana e finais de semana. Utilizando a biblioteca `lubridate`, conseguimos transformar as datas do *data frame* em dias da semana, de forma que, ao escolhermos as duas linguagens para análise, a manipulação dos dados seja mais prática.
+Os dias da semana são representados de 1 à 7, representando respectivamente de Domingo à Sábado.
+
+```{r}
+github <- mutate(github, dia_da_semana = wday(ymd(paste(github$the_year,"/",github$the_month,"/",github$month_day))))
+
+glimpse(github)
+```
 
 Existem diversas extensões, que representam linguagens. Desse universo, filtraremos os dados para analisar somente as linguagem *python* e *shell*.
 
@@ -27,19 +36,15 @@ Existem diversas extensões, que representam linguagens. Desse universo, filtrar
 dados_python <- github %>%
           filter(file_extension == 'py')
 
-
 dados_shell <- github %>%
           filter(file_extension == 'sh')
-
-dados_shell %>% rbind(dados_shell, x = ymd(paste(dados_shell$the_year,"/",dados_shell$the_month,"/",dados_shell$month_day)))
 ```
-
-
 
 Como temos apenas uma amostra dos dados do GitHub, a técnica de *bootstrapping* se enciaxa como alternativa para gerar um conjunto de amostras, grande o suficiente para emular uma população, com o intuito de fazermos inferências que sejam confiáveis.
 
 ## Perguntas
 
 1 - Para cada uma delas, há uma diferença significativa na sua popularidade durante a semana e durante o fim de semana? Essa diferença é grande? (dica: aqui você precisa decidir como medir popularidade: média? mediana? outra estatística?)
+
 
 2 - Existe uma diferença significativa entre a popularidade das duas linguagens nos fins de semana? (a mesma dica vale)
