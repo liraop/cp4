@@ -8,6 +8,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(printr)
 library(lubridate)
+library(plotly)
 ```
 
 ## Os dados
@@ -48,13 +49,11 @@ dados_shell <- github %>%
           filter(file_extension == 'sh')
 ```
 
-Como temos apenas uma amostra dos dados do GitHub, a técnica de *bootstrapping* se enciaxa como alternativa para gerar um conjunto de amostras, grande o suficiente para emular uma população, com o intuito de fazermos inferências que sejam confiáveis.
-
 ## Perguntas
 
 > 1 - Para cada uma delas, há uma diferença significativa na sua popularidade durante a semana e durante o fim de semana? Essa diferença é grande? (dica: aqui você precisa decidir como medir popularidade: média? mediana? outra estatística?)
 
-Para responder essa pergunta, defino como critério de popularidade a média de usuários que commitaram durante a semana e o final de semana. Por quê a média? Porque todos os usuários tem valor igual para nossa análise. Queremos inferir uma estatística que é comum a todos, sem peso ou valor maior para um elemento específico.
+Para responder essa pergunta, defino como critério de popularidade a média de usuários que commitaram durante a semana e o final de semana. Por quê a média? Porque todos os usuários tem valor igual para nossa análise. Queremos analisar uma estatística que é comum a todos, sem peso ou valor maior para um elemento específico.
 
 Assim, temos as seguintes tabelas com a média de usuários que commitaram da amostra para dias de semana e finais de semana
 
@@ -65,38 +64,37 @@ amostra_shell = dados_shell
 amostra_python <- dados_python %>%
           select(eh_fds, users) %>%
           group_by(eh_fds) %>%
-          summarise(mean(users))
+          summarise(media_usuarios = mean(users))
 
 amostra_shell <- dados_shell %>%
           select(eh_fds, users) %>%
           group_by(eh_fds) %>%
-          summarise(mean(users))
+          summarise(media_usuarios = mean(users))
 
 ```
 
+
+Para a linguagem *shell*:
 
 ```{r}
-media_amostra = mean(amostra$)
+shell <- ggplot(amostra_shell, aes(eh_fds, media_usuarios, fill = eh_fds)) + 
+  geom_bar(stat="identity", position = "dodge") + 
+  scale_fill_brewer(palette = "Set1")
 
-repeticoes = 5000
-
-exp_com_bootstrap <- function(x){
-  boot_x <- sample(x,
-                   size = NROW(x), 
-                   replace = TRUE) # aqui é o bootstrap
-  return(mean(boot_x))
-}
-
-# Agora o input das reamostragens é a amostra!
-experimentos = data_frame(i = 1:repeticoes) %>% 
-    rowwise() %>% 
-    mutate(media_exp = exp_com_bootstrap(amostra)) %>%  # <- Aqui!
-    ungroup() 
-
-ggplot(experimentos, aes(x = media_exp)) + 
-  geom_histogram(binwidth = 1, colour = "darkorange", fill = "white")
-summary(experimentos)
-
+ggplotly(shell)
 ```
+
+Para a linguagem *python*:
+
+```{r}
+python <- ggplot(amostra_python, aes(eh_fds, media_usuarios, fill = eh_fds)) + 
+  geom_bar(stat="identity", position = "dodge") + 
+  scale_fill_brewer(palette = "Set1")
+
+ggplotly(python)
+```
+
+Vemos que existe uma diferença significativa entre a popularidade da linguagem durante a semana e durante o final de semana. É quase o dobro da média de usuários que commitam mais durante a semana.
+
 
 > 2 - Existe uma diferença significativa entre a popularidade das duas linguagens nos fins de semana? (a mesma dica vale)
