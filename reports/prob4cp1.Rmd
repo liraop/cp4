@@ -35,11 +35,8 @@ glimpse(github)
 Existem diversas extensões, que representam linguagens. Desse universo, filtraremos os dados para analisar somente as linguagem *python* e *shell*.
 
 ```{r}
-dados_python <- github %>%
-          filter(file_extension == 'py')
-
-dados_shell <- github %>%
-          filter(file_extension == 'sh')
+dados_filtrados <- github %>%
+          filter(file_extension == 'py' | file_extension == "sh")
 ```
 
 ## Perguntas
@@ -51,25 +48,18 @@ Para responder essa pergunta, defino como critério de popularidade a média de 
 Assim, temos as seguintes tabelas com a média de usuários que commitaram da amostra para dias de semana e finais de semana
 
 ```{r}
-amostra_python = dados_python
-amostra_shell = dados_shell
-
-amostra_python <- dados_python %>%
-          select(eh_fds, users) %>%
-          group_by(eh_fds) %>%
+amostra <- dados_filtrados %>%
+          select(eh_fds, users, file_extension) %>%
+          group_by(eh_fds, file_extension) %>%
           summarise(media_usuarios = mean(users))
-
-amostra_shell <- dados_shell %>%
-          select(eh_fds, users) %>%
-          group_by(eh_fds) %>%
-          summarise(media_usuarios = mean(users))
-
 ```
 
 
 Para a linguagem *shell*:
 
 ```{r warning=FALSE, echo=FALSE, message=FALSE}
+amostra_shell <- amostra %>% filter(file_extension == "sh")
+
 shell <- ggplot(amostra_shell, aes(eh_fds, media_usuarios, fill = eh_fds)) + 
   labs(x = "É final de semana?",
        y = "Média de usuário que commitaram",
@@ -81,11 +71,13 @@ ggplotly(shell)
 ```
 
 Podemos ver que os programadores em *shell* preferem subir seu trabalho durante os dias de semana.
-A diferença é razoável mas não chega a ser gritante como o da linguagem *python*.
+A diferença é razoável mas não chega a ser tão grande como o da linguagem *python* logo abaixo.
 
 Para a linguagem *python*:
 
 ```{r warning=FALSE, echo=FALSE, message=FALSE}
+amostra_python <- amostra %>% filter(file_extension == "py")
+
 python <- ggplot(amostra_python, aes(eh_fds, media_usuarios, fill = eh_fds)) + 
   labs(x = "É final de semana?",
        y = "Média de usuário que commitaram",
@@ -101,13 +93,7 @@ Vemos que existe uma diferença significativa entre a popularidade da linguagem 
 > 2 - Existe uma diferença significativa entre a popularidade das duas linguagens nos fins de semana? (a mesma dica vale)
 
 ```{r warning=FALSE, echo=FALSE, message=FALSE}
-essa_aqui <- github %>%
-          filter(file_extension == 'py' | file_extension == "sh")
-
-essa_aqui <- essa_aqui %>% 
-            select(eh_fds, users, file_extension) %>%
-            group_by(eh_fds,file_extension) %>%
-            summarise(media_usuarios = mean(users)) %>%
+essa_aqui <- amostra %>%
             subset(eh_fds == "Sim")
 
 number2 <- ggplot(essa_aqui, aes(file_extension, media_usuarios, fill = file_extension)) + 
