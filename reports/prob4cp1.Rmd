@@ -3,8 +3,7 @@ title: "cp4"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r setup, include=FALSE, warning=FALSE, echo=FALSE}
 library(tidyverse)
 library(printr)
 library(lubridate)
@@ -25,17 +24,11 @@ A .csv contém os dados de commits de 2016 até 2017, além a quantidade de usu�
 Sabemos, contudo, que queremos observar o comportamento desses dados durante dias de semana e finais de semana. Utilizando a biblioteca `lubridate`, conseguimos transformar as datas do *data frame* em dias da semana, de forma que, ao escolhermos as duas linguagens para análise, a manipulação dos dados seja mais prática.
 Os dias da semana são representados de 1 à 7, representando respectivamente de Domingo à Sábado.
 
-```{r}
-github <- mutate(github, dia_da_semana = wday(ymd(paste(github$the_year,"/",github$the_month,"/",github$month_day))))
-
-glimpse(github)
-```
-
 É interessante deixar a manipulação dos dados da maneira mais intuitiva possível. Para isso, sabemos que os dias 1 e 7, Sábado e Domingo, respectivamente, são finais de semana. Formalizando isso na tabela:
 
 ```{r}
+github <- mutate(github, dia_da_semana = wday(ymd(paste(github$the_year,"/",github$the_month,"/",github$month_day))))
 github <- mutate(github, eh_fds = ifelse(github$dia_da_semana == 1 | github$dia_da_semana == 7, "Sim", "Não"))
-
 glimpse(github)
 ```
 
@@ -76,7 +69,7 @@ amostra_shell <- dados_shell %>%
 
 Para a linguagem *shell*:
 
-```{r}
+```{r warning=FALSE, echo=FALSE, message=FALSE}
 shell <- ggplot(amostra_shell, aes(eh_fds, media_usuarios, fill = eh_fds)) + 
   labs(x = "É final de semana?",
        y = "Média de usuário que commitaram",
@@ -92,7 +85,7 @@ A diferença é razoável mas não chega a ser gritante como o da linguagem *pyt
 
 Para a linguagem *python*:
 
-```{r}
+```{r warning=FALSE, echo=FALSE, message=FALSE}
 python <- ggplot(amostra_python, aes(eh_fds, media_usuarios, fill = eh_fds)) + 
   labs(x = "É final de semana?",
        y = "Média de usuário que commitaram",
@@ -107,9 +100,24 @@ Vemos que existe uma diferença significativa entre a popularidade da linguagem 
 
 > 2 - Existe uma diferença significativa entre a popularidade das duas linguagens nos fins de semana? (a mesma dica vale)
 
-```{r}
-amostra_python = dados_python
-amostra_shell = dados_shell
+```{r warning=FALSE, echo=FALSE, message=FALSE}
+essa_aqui <- github %>%
+          filter(file_extension == 'py' | file_extension == "sh")
 
+essa_aqui <- essa_aqui %>% 
+            select(eh_fds, users, file_extension) %>%
+            group_by(eh_fds,file_extension) %>%
+            summarise(media_usuarios = mean(users)) %>%
+            subset(eh_fds == "Sim")
 
+number2 <- ggplot(essa_aqui, aes(file_extension, media_usuarios, fill = file_extension)) + 
+  labs(x = "Linguagem",
+       y = "Média de usuário que commitaram",
+       title = "Média de popularidade do Python vs Shell em Finais de Semana" ) +
+  geom_bar(stat="identity", position = "dodge") + 
+  scale_fill_brewer(palette = "Set1")
+
+ggplotly(number2)
 ```
+
+Podemos ver a gritante diferença de popularidade entre *shell* e *python* durante os commits de finais de semana. O pessoal prefere passar o free time se divertindo com *python*, claramente. 
