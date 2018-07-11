@@ -37,6 +37,8 @@ Existem diversas extensões, que representam linguagens. Desse universo, filtrar
 ```{r}
 dados_filtrados <- github %>%
           filter(file_extension == 'py' | file_extension == "sh")
+dados_filtrados <- mutate(dados_filtrados, file_extension = ifelse(dados_filtrados$file_extension == "py" , "Python", "Shell"))
+
 ```
 
 ## Perguntas
@@ -58,7 +60,7 @@ amostra <- dados_filtrados %>%
 Para a linguagem *shell*:
 
 ```{r warning=FALSE, echo=FALSE, message=FALSE}
-amostra_shell <- amostra %>% filter(file_extension == "sh")
+amostra_shell <- amostra %>% filter(file_extension == "Shell")
 
 shell <- ggplot(amostra_shell, aes(eh_fds, media_usuarios, fill = eh_fds)) + 
   labs(x = "É final de semana?",
@@ -76,7 +78,7 @@ A diferença é razoável mas não chega a ser tão grande como o da linguagem *
 Para a linguagem *python*:
 
 ```{r warning=FALSE, echo=FALSE, message=FALSE}
-amostra_python <- amostra %>% filter(file_extension == "py")
+amostra_python <- amostra %>% filter(file_extension == "Python")
 
 python <- ggplot(amostra_python, aes(eh_fds, media_usuarios, fill = eh_fds)) + 
   labs(x = "É final de semana?",
