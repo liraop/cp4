@@ -8,6 +8,7 @@ library(tidyverse)
 library(printr)
 library(lubridate)
 library(plotly)
+library(resample)
 ```
 
 ## Os dados
@@ -52,8 +53,7 @@ Assim, temos as seguintes tabelas com a média de usuários que commitaram da am
 ```{r}
 amostra <- dados_filtrados %>%
           select(eh_fds, users, file_extension) %>%
-          group_by(eh_fds, file_extension) %>%
-          summarise(media_usuarios = mean(users))
+          group_by(eh_fds, file_extension)
 ```
 
 
@@ -62,7 +62,7 @@ Para a linguagem *shell*:
 ```{r warning=FALSE, echo=FALSE, message=FALSE}
 amostra_shell <- amostra %>% filter(file_extension == "Shell")
 
-shell <- ggplot(amostra_shell, aes(eh_fds, media_usuarios, fill = eh_fds)) + 
+shell <- amostra_shell %>% group_by(eh_fds) %>% summarise(media_usuarios = mean(users)) %>% ggplot(aes(eh_fds, media_usuarios, fill = eh_fds)) + 
   labs(x = "É final de semana?",
        y = "Média de usuário que commitaram",
        title = "Média de popularidade do Shell em Dias de Semana vs Finais de Semana" ) +
@@ -73,6 +73,32 @@ ggplotly(shell)
 ```
 
 Podemos ver que os programadores em *shell* preferem subir seu trabalho durante os dias de semana.
+
+```{r}
+mean.fds_sh = amostra_shell %>%
+  filter(eh_fds == "Sim") %>% 
+  bootstrap(mean(users),
+            R=2000) %>%
+  CI.percentile(probs = c(.025, .975))
+
+mean.semana_sh = amostra_shell %>%
+  filter(eh_fds == "Não") %>%
+  bootstrap(mean(users),
+            R=2000) %>%
+  CI.percentile(probs = c(.025, .975))
+
+```
+
+```{r}
+df = data.frame(rbind(mean.fds_sh, mean.semana_sh))
+
+df$medida = c(' Shell em dias de final de semana', 'Shell em dias de semana')
+
+df %>% 
+  ggplot(aes(x = medida, ymin = X2.5., ymax = X97.5.)) + 
+  geom_errorbar(width = .2)
+```
+
 A diferença é razoável mas não chega a ser tão grande como o da linguagem *python* logo abaixo.
 
 Para a linguagem *python*:
@@ -80,7 +106,7 @@ Para a linguagem *python*:
 ```{r warning=FALSE, echo=FALSE, message=FALSE}
 amostra_python <- amostra %>% filter(file_extension == "Python")
 
-python <- ggplot(amostra_python, aes(eh_fds, media_usuarios, fill = eh_fds)) + 
+python <- amostra_python %>% group_by(eh_fds) %>% summarise(media_usuarios = mean(users)) %>% ggplot(aes(eh_fds, media_usuarios, fill = eh_fds)) + 
   labs(x = "É final de semana?",
        y = "Média de usuário que commitaram",
        title = "Média de popularidade do Python em Dias de Semana vs Finais de Semana" ) +
@@ -90,22 +116,46 @@ python <- ggplot(amostra_python, aes(eh_fds, media_usuarios, fill = eh_fds)) +
 ggplotly(python)
 ```
 
+```{r}
+mean.fds_py = amostra_python %>%
+  filter(eh_fds == "Sim") %>% 
+  bootstrap(mean(users),
+            R=2000) %>%
+  CI.percentile(probs = c(.025, .975))
+
+mean.semana_py = amostra_python %>%
+  filter(eh_fds == "Não") %>%
+  bootstrap(mean(users),
+            R=2000) %>%
+  CI.percentile(probs = c(.025, .975))
+
+```
+
+```{r}
+df = data.frame(rbind(mean.fds_py, mean.semana_py))
+
+df$medida = c(' Python em dias de final de semana', 'Python em dias de semana')
+
+df %>% 
+  ggplot(aes(x = medida, ymin = X2.5., ymax = X97.5.)) + 
+  geom_errorbar(width = .2)
+```
+
 Vemos que existe uma diferença significativa entre a popularidade da linguagem durante a semana e durante o final de semana. É quase o dobro da média de usuários que commitam mais durante a semana.
 
 > 2 - Existe uma diferença significativa entre a popularidade das duas linguagens nos fins de semana? (a mesma dica vale)
 
 ```{r warning=FALSE, echo=FALSE, message=FALSE}
-essa_aqui <- amostra %>%
-            subset(eh_fds == "Sim")
+df.mean = data.frame(rbind(mean.fds_py, 
+                             mean.fds_sh))
 
-number2 <- ggplot(essa_aqui, aes(file_extension, media_usuarios, fill = file_extension)) + 
-  labs(x = "Linguagem",
-       y = "Média de usuário que commitaram",
-       title = "Média de popularidade do Python vs Shell em Finais de Semana" ) +
-  geom_bar(stat="identity", position = "dodge") + 
-  scale_fill_brewer(palette = "Set1")
 
-ggplotly(number2)
+df.mean$medida = c("Python", "Shell")
+
+df.mean %>% 
+  ggplot(aes(x = medida, ymin = X2.5., ymax = X97.5.)) + 
+  geom_errorbar(width = .2)
+
 ```
 
-Podemos ver a gritante diferença de popularidade entre *shell* e *python* durante os commits de finais de semana. O pessoal prefere passar o free time se divertindo com *python*, claramente. 
+Podemos ver a gritante diferença não-pareada de popularidade entre *shell* e *python* durante os commits de finais de semana. O pessoal prefere passar o free time se divertindo com *python*, claramente. 
