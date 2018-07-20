@@ -1,0 +1,23 @@
+---
+title: "prob4cp3"
+output: html_document
+---
+
+```{r setup, include=FALSE, warning=FALSE, echo=FALSE}
+library(tidyverse)
+library(printr)
+library(lubridate)
+library(plotly)
+library(resample)
+```
+
+```{r}
+github = read.csv(here::here("data/github-users-committing-filetypes.csv"))
+```
+
+## As novas perguntas e respostas
+
+> 4 - Dada a amostra, é possível inferir a média de contribuição mensal entre os anos? 
+
+
+> 6 - Dada a amostra, é possível inferir qual a linguagem mais popular do mês?
