@@ -19,5 +19,55 @@ github = read.csv(here::here("data/github-users-committing-filetypes.csv"))
 
 > 4 - Dada a amostra, é possível inferir a média de contribuição mensal entre os anos? 
 
+```{r warning=FALSE, echo=FALSE, message=FALSE}
+amostra_2016 <- github %>% filter(the_year == "2016") 
+amostra_2017 <- github %>% filter(the_year == "2017") 
+
+mean.amostra_2016 = amostra_2016 %>%
+  group_by(the_month) %>% 
+  bootstrap(mean(users),
+            R=2000) %>%
+  CI.percentile(probs = c(.025, .975))
+
+mean.amostra_2017 = amostra_2017 %>%
+  group_by(the_month) %>% 
+  bootstrap(mean(users),
+            R=2000) %>%
+  CI.percentile(probs = c(.025, .975))
+
+
+```
+
+
+```{r}
+df = data.frame(rbind(mean.amostra_2016, mean.amostra_2017))
+
+df$medida = c('Média de contribuições mensais em 2016', 'Média de contribuições mensais em 2017')
+
+df %>% 
+  ggplot(aes(x = medida, ymin = X2.5., ymax = X97.5.)) + 
+  geom_errorbar(width = .2)
+```
+
+Pelo gráfico, observamos que as contribuições em 2016 possuem valores bem mais próximos que a de 2017, contudo, ambas as estimativas compartilham uma faixa de valores. 
+Abaixo o gráfico com a diferença das médias de contribuição dos anos. Vemos que 95% das contribuições são positivas, o que quer dizer que, dada esta amostra, em 2016 provavelmente houve uma maior contribuição mensal que em 2017. 
+
+```{r}
+amostra_2016 <- amostra_2016 %>% group_by(the_month)
+amostra_2017 <- amostra_2017 %>% group_by(the_month)
+
+
+diff.means = bootstrap2(data = amostra_2016$users, 
+                        data2 = amostra_2017$users, 
+                          mean)
+
+means.diff = CI.percentile(diff.means, probs = c(.05, .95))
+means.diff
+
+data.frame(means.diff) %>% 
+  ggplot(aes(x = "Diferença", ymin = X5., ymax = X95.)) + 
+  geom_errorbar(width = .2) + 
+  geom_hline(yintercept = 0, colour = "darkorange")
+```
 
 > 6 - Dada a amostra, é possível inferir qual a linguagem mais popular do mês?
